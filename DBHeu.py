@@ -292,7 +292,7 @@ if __name__ != 'main':
     TABU_time = time.time() - TABU_start
 
 
-    obtained = region_list_from_array(cluster_object.labels_)
+    obtained = region_list_from_array(cluster_object_AZP.labels_)
     print(obtained)
     print('\ndistance:',calculateWithinRegionDistance(obtained, distanceMatrix))
     # compare_region_lists(obtained, regionSetList1[0])
