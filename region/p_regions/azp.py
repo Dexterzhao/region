@@ -96,7 +96,7 @@ class AZP:
             attr_comp = attr[comp_idx]
             self.allow_move_strategy.start_new_component(
                     labels_comp, attr_comp, self.objective_func, comp_idx)
-            
+
             labels_comp = self._azp_connected_component(
                     adj_comp, labels_comp, attr_comp)
             labels[comp_idx] = labels_comp

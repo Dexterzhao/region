@@ -534,9 +534,9 @@ def distribute_regions_among_components(component_labels, n_regions):
     component_labels : list
         Each element specifies to which connected component an area belongs.
         An example would be [0, 0, 1, 0, 0, 1] for the following two islands:
-        
+
         ::
-        
+
           island one        island two
           .-------.         .---.
           | 0 | 1 |         | 2 |
@@ -734,7 +734,7 @@ def assert_feasible(solution, adj, n_regions=None):
     if n_regions is not None:
         if len(set(solution)) != n_regions:
             raise ValueError("The number of regions is {} but "
-                             "should be {}".format(len(solution), n_regions))
+                             "should be {}".format(len(set(solution)), n_regions))
     for region_label in set(solution):
         _, comp_labels = csg.connected_components(adj)
         # check whether equal region_label implies equal comp_label

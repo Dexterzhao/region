@@ -37,7 +37,7 @@ class MaxPRegionsHeu:
         self.metric = raise_distance_metric_not_set
 
     def fit_from_scipy_sparse_matrix(
-            self, adj, attr, spatially_extensive_attr, threshold, max_it=10,
+            self, adj, attr, spatially_extensive_attr, partitionList, threshold, max_it = 10,
             objective_func=ObjectiveFunctionPairwise()):
         """
         Solve the max-p-regions problem in a heuristic way (see [DAR2012]_).
@@ -67,7 +67,7 @@ class MaxPRegionsHeu:
         objective_func : :class:`region.objective_function.ObjectiveFunction`, default: ObjectiveFunctionPairwise()
             The objective function to use.
         """
-        print("f_f_SCIPY got:\n", attr, "\n", spatially_extensive_attr, "\n", threshold, sep="")
+        # print("f_f_SCIPY got:\n", attr, "\n", spatially_extensive_attr, "\n", threshold, sep="")
         w = weights.WSP(adj).to_W()
         areas_dict = w.neighbors
         self.metric = objective_func.metric
@@ -80,30 +80,33 @@ class MaxPRegionsHeu:
 
         # construction phase
         # print("constructing")
-        for _ in range(max_it):
-            # print(" ", _)
-            partition, enclaves = self.grow_regions(
-                    adj, attr, spatially_extensive_attr, threshold)
-            n_regions = len(partition)
-            if n_regions > max_p:
-                partitions_before_enclaves_assignment = [(partition, enclaves)]
-                max_p = n_regions
-            elif n_regions == max_p:
-                partitions_before_enclaves_assignment.append((partition,
-                                                              enclaves))
-
-        # print("\n" + "assigning enclaves")
-        for partition, enclaves in partitions_before_enclaves_assignment:
-            # print("  cleaning up in partition", partition)
-            feasible_partitions.append(self.assign_enclaves(
-                    partition, enclaves, areas_dict, attr))
-
-        for partition in feasible_partitions:
-            print(partition, "\n")
+        if partitionList:
+            max_p =len(partitionList[0])
+            feasible_partitions = partitionList
+        else:
+            for _ in range(max_it):
+                # print(" ", _)
+                partition, enclaves = self.grow_regions(
+                        adj, attr, spatially_extensive_attr, threshold)
+                n_regions = len(partition)
+                if n_regions > max_p:
+                    partitions_before_enclaves_assignment = [(partition, enclaves)]
+                    max_p = n_regions
+                elif n_regions == max_p:
+                    partitions_before_enclaves_assignment.append((partition, enclaves))
+            # print("\n" + "assigning enclaves")
+            for partition, enclaves in partitions_before_enclaves_assignment:
+                # print("  cleaning up in partition", partition)
+                feasible_partitions.append(self.assign_enclaves(
+                        partition, enclaves, areas_dict, attr))
+            for partition in feasible_partitions:
+                print(len(partition),partition, "\n")
 
         # local search phase
         if self.local_search is None:
             self.local_search = AZP()
+        # elif self.local_search == AZPSimulatedAnnealing():
+        #     self.local_search.init_temperature = 1
         self.local_search.allow_move_strategy = AllowMoveAZPMaxPRegions(
                 spatially_extensive_attr, threshold,
                 self.local_search.allow_move_strategy)
